@@ -402,18 +402,50 @@ namespace Falltergeist
             if (!object) {
                 return;
             }
+
+            Game::Object* finalObject = object;
+
+            if (object->type() == Game::Object::Type::WALL) {
+
+                bool found = false;
+                for (int i = 1; i < 2; i++) {
+                    if (!found) {
+                        auto nearHexagons = Game::Game::getInstance()->locationState()->hexagonGrid()->ring(object->hexagon(), i);
+
+                        for (auto hexagon: nearHexagons) {
+                            if (!found) {
+                                auto position = hexagon->number();
+                                auto nearObjects = Game::Game::getInstance()->locationState()->hexagonGrid()->at(position)->objects();
+
+                                for (auto nearObject : *nearObjects) {
+                                    if (nearObject->type() == Game::Object::Type::ITEM) {
+                                        if (auto foundObject = dynamic_cast<Game::ItemObject *>(nearObject)) {
+                                            logger->info() << "[ITEM] near: " << foundObject->name() << std::endl;
+                                            found = true;
+                                            finalObject = foundObject;
+                                            break;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
             if (event->button() == Event::Mouse::Button::LEFT) {
                 if (event->name() == "mousedown") {
-                    _objectUnderCursor = object;
+                    _objectUnderCursor = finalObject;
+
                     _actionCursorTimer.start();
                     _actionCursorButtonPressed = true;
                 } else if (event->name() == "mouseclick") {
-                    auto icons = getCursorIconsForObject(object);
+
+                    auto icons = getCursorIconsForObject(finalObject);
                     if (!icons.empty()) {
                         // Move
-                        movePlayerToObject(object);
+                        movePlayerToObject(finalObject);
                         // Use
-                        handleAction(object, icons.front());
+                        handleAction(finalObject, icons.front());
                         _actionCursorButtonPressed = false;
                     }
                 }
@@ -422,6 +454,7 @@ namespace Falltergeist
 
         void Location::onObjectHover(Event::Mouse *event, Game::Object *object)
         {
+
             if (event->name() == "mouseout") {
                 if (_objectUnderCursor == object) {
                     _objectUnderCursor = nullptr;
@@ -429,6 +462,35 @@ namespace Falltergeist
             } else {
                 if (_objectUnderCursor == nullptr || event->name() == "mousein") {
                     _objectUnderCursor = object;
+
+                    if (object->type() == Game::Object::Type::WALL) {
+
+                        bool found = false;
+                        for (int i = 1; i < 2; i++) {
+                            if (!found) {
+                                auto nearHexagons = Game::Game::getInstance()->locationState()->hexagonGrid()->ring(object->hexagon(), i);
+
+                                for (auto hexagon: nearHexagons) {
+                                    if (!found) {
+                                        auto position = hexagon->number();
+                                        auto nearObjects = Game::Game::getInstance()->locationState()->hexagonGrid()->at(position)->objects();
+
+                                        for (auto nearObject : *nearObjects) {
+                                            if (nearObject->type() == Game::Object::Type::ITEM) {
+                                                if (auto foundObject = dynamic_cast<Game::ItemObject *>(nearObject)) {
+                                                    logger->info() << "[ITEM] near: " << foundObject->name() << std::endl;
+                                                    found = true;
+                                                    _objectUnderCursor = foundObject;
+                                                    break;
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+
                     _actionCursorButtonPressed = false;
                 }
 
@@ -1265,6 +1327,34 @@ namespace Falltergeist
 
                 Point position = mouse->position() - object->ui()->position() + object->ui()->offset();
                 if (object->ui()->opaque(position)) {
+
+                    if (object->type() == Game::Object::Type::WALL) {
+
+                        bool found = false;
+                        for (int i = 1; i < 2; i++) {
+                            if (!found) {
+                                auto nearHexagons = Game::Game::getInstance()->locationState()->hexagonGrid()->ring(object->hexagon(), i);
+
+                                for (auto hexagon: nearHexagons) {
+                                    if (!found) {
+                                        auto position = hexagon->number();
+                                        auto nearObjects = Game::Game::getInstance()->locationState()->hexagonGrid()->at(position)->objects();
+
+                                        for (auto nearObject : *nearObjects) {
+                                            if (nearObject->type() == Game::Object::Type::ITEM) {
+                                                if (auto foundObject = dynamic_cast<Game::ItemObject *>(nearObject)) {
+                                                    logger->info() << "[ITEM] near: " << foundObject->name() << std::endl;
+                                                    found = true;
+                                                    return foundObject;
+                                                    break;
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
                     return object;
                 }
             }
