@@ -408,7 +408,7 @@ namespace Falltergeist
             if (object->type() == Game::Object::Type::WALL) {
                 bool found = false;
 
-                for (int i = 1; i < 6; i++) {
+                for (int i = 1; i < 5; i++) {
                     if (!found) {
                         auto nearHexagons = Game::Game::getInstance()->locationState()->hexagonGrid()->ring(object->hexagon(), i);
 
@@ -474,7 +474,7 @@ namespace Falltergeist
                     if (object->type() == Game::Object::Type::WALL) {
                         bool found = false;
 
-                        for (int i = 1; i < 6; i++) {
+                        for (int i = 1; i < 5; i++) {
                             if (!found) {
                                 auto nearHexagons = Game::Game::getInstance()->locationState()->hexagonGrid()->ring(object->hexagon(), i);
 
@@ -1348,7 +1348,7 @@ namespace Falltergeist
                     if (object->type() == Game::Object::Type::WALL) {
 
                         bool found = false;
-                        for (int i = 1; i < 2; i++) {
+                        for (int i = 1; i < 4; i++) {
                             if (!found) {
                                 auto nearHexagons = Game::Game::getInstance()->locationState()->hexagonGrid()->ring(object->hexagon(), i);
 
@@ -1361,6 +1361,15 @@ namespace Falltergeist
                                             if (nearObject->type() == Game::Object::Type::ITEM) {
                                                 if (auto foundObject = dynamic_cast<Game::ItemObject *>(nearObject)) {
                                                     logger->info() << "[ITEM] near: " << foundObject->name() << std::endl;
+                                                    found = true;
+                                                    return foundObject;
+                                                    break;
+                                                }
+                                            }
+
+                                            if (nearObject->type() == Game::Object::Type::SCENERY) {
+                                                if (auto foundObject = dynamic_cast<Game::LadderSceneryObject *>(nearObject)) {
+                                                    logger->info() << "[LADDER] near: " << foundObject->name() << std::endl;
                                                     found = true;
                                                     return foundObject;
                                                     break;
